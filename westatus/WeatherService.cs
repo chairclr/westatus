@@ -9,9 +9,9 @@ public class WeatherService : IDisposable
 
     private readonly HttpClient _httpClient = new HttpClient();
 
-    private Root? _data;
-
-    private Timer? _timer;
+    private readonly Timer _timer;
+    
+    private WeatherForecast? _data;
 
     public WeatherService(Config config)
     {
@@ -19,7 +19,7 @@ public class WeatherService : IDisposable
 
         _timer = new Timer(async x =>
         {
-            _data = (await _httpClient.GetFromJsonAsync<Root>($"https://api.open-meteo.com/v1/forecast?latitude={_config.Weather.Latitude}&longitude={_config.Weather.Longitude}&timezone=GMT&hourly=temperature_2m,precipitation_probability,precipitation,weather_code&daily=weather_code&forecast_days=2"))!;
+            _data = await _httpClient.GetFromJsonAsync($"https://api.open-meteo.com/v1/forecast?latitude={_config.Weather.Latitude}&longitude={_config.Weather.Longitude}&timezone=GMT&hourly=temperature_2m,precipitation_probability,precipitation,weather_code&forecast_days=2", WeatherSourceGenerationContext.Default.WeatherForecast);
         }, null, TimeSpan.Zero, TimeSpan.FromSeconds(Math.Max(_config.Weather.SyncFrequency, 100)));
     }
 
@@ -36,12 +36,12 @@ public class WeatherService : IDisposable
 
             sb.Replace("{{ current_icon }}", GetIconFromCode(_data.Hourly.WeatherCode[CurrentHour]!.Value));
             sb.Replace("{{ current_temp }}", ((int)Math.Round(_data.Hourly.Temperature2m[CurrentHour]!.Value)).ToString());
-            
+
             sb.Replace("{{ trend_icon }}", Trend);
 
             sb.Replace("{{ forecast_icon }}", GetIconFromCode(_data.Hourly.WeatherCode[ForecastedHour]!.Value));
             sb.Replace("{{ forecast_temp }}", ((int)Math.Round(_data.Hourly.Temperature2m[ForecastedHour]!.Value)).ToString());
-        
+
             return sb.ToString();
         }
     }
@@ -146,7 +146,7 @@ public class WeatherService : IDisposable
         [property: JsonPropertyName("weather_code")] string WeatherCode
     );
 
-    public record Root(
+    public record WeatherForecast(
         [property: JsonPropertyName("latitude")] double? Latitude,
         [property: JsonPropertyName("longitude")] double? Longitude,
         [property: JsonPropertyName("generationtime_ms")] double? GenerationtimeMs,
@@ -159,4 +159,18 @@ public class WeatherService : IDisposable
         [property: JsonPropertyName("daily_units")] DailyUnits DailyUnits,
         [property: JsonPropertyName("daily")] Daily Daily
     );
+}
+
+// Souce generation based json, rather than reflection
+[JsonSourceGenerationOptions(WriteIndented = true)]
+[JsonSerializable(typeof(WeatherService.WeatherForecast))]
+[JsonSerializable(typeof(WeatherService.HourlyUnits))]
+[JsonSerializable(typeof(WeatherService.Hourly))]
+[JsonSerializable(typeof(WeatherService.DailyUnits))]
+[JsonSerializable(typeof(WeatherService.Daily))]
+[JsonSerializable(typeof(IReadOnlyList<int?>))]
+[JsonSerializable(typeof(IReadOnlyList<double?>))]
+[JsonSerializable(typeof(IReadOnlyList<string>))]
+internal partial class WeatherSourceGenerationContext : JsonSerializerContext
+{
 }
