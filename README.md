@@ -37,3 +37,9 @@ interval = 60
 Result:
 
 ![polybar weather integration](screenshots/polybar-weather.png)
+
+# TODO
+TODO:
+- Add precipitation chance/amount
+- Add more status stuff
+- idk clean up code?
