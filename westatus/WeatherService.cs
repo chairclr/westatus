@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using System.Text;
 using System.Text.Json.Serialization;
 
@@ -23,9 +22,6 @@ public class WeatherService : IDisposable
             _data = (await _httpClient.GetFromJsonAsync<Root>($"https://api.open-meteo.com/v1/forecast?latitude={_config.Weather.Latitude}&longitude={_config.Weather.Longitude}&timezone=GMT&hourly=temperature_2m,precipitation_probability,precipitation,weather_code&daily=weather_code&forecast_days=2"))!;
         }, null, TimeSpan.Zero, TimeSpan.FromSeconds(Math.Max(_config.Weather.SyncFrequency, 100)));
     }
-
-    //public string Format => _data is null ? $"No weather data" :
-    //$"{GetIconFromCode(_data.Hourly.WeatherCode[CurrentHour]!.Value)} {(int)Math.Round(_data.Hourly.Temperature2m[CurrentHour]!.Value)}°C {Trend} {GetIconFromCode(_data.Hourly.WeatherCode[ForecastedHour]!.Value)} {(int)Math.Round(_data.Hourly.Temperature2m[ForecastedHour]!.Value)}°C";
 
     public string Format
     {
