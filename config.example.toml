@@ -16,9 +16,9 @@ enabled = true
 latitude = 52.52
 # longitude for weather location
 longitude = 13.13
-# how many seconds between getting weather data
-# defaults to 400, must be at least 100
-sync_frequency = 400
+# how many seconds between syncing weather data
+# defaults to 1800 (every 30 minutes), must be at least 100
+sync_frequency = 1800
 # number of hours to forecast ahead, between 1 and 12
 # defaults to 3
 forecast_hours = 3
