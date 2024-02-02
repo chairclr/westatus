@@ -13,6 +13,10 @@ public class WeatherService : IDisposable
     
     private WeatherForecast? _data;
 
+    private int CurrentHour => DateTime.UtcNow.Hour;
+
+    private int ForecastedHour => DateTime.UtcNow.Hour + _config.Weather.ForecastHours;
+
     public WeatherService(Config config)
     {
         _config = config;
@@ -73,10 +77,6 @@ public class WeatherService : IDisposable
             }
         }
     }
-
-    private int CurrentHour => DateTime.UtcNow.Hour;
-
-    private int ForecastedHour => DateTime.UtcNow.Hour + _config.Weather.ForecastHours;
 
     public void Dispose()
     {
